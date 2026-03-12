@@ -81,7 +81,7 @@ export function RegisterPage() {
               required
               value={document}
               onChange={(e) => setDocument(e.target.value)}
-              placeholder="Ej. DNI, pasaporte..."
+              placeholder="Ej. C.I., pasaporte..."
             />
           </div>
           <div>

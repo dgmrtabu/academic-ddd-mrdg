@@ -8,6 +8,7 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "test": "jest",
+    "test:cov": "jest --coverage --watchman=false",
     "typeorm": "typeorm-ts-node-commonjs -d ./src/contexts/shared/infrastructure/persistence/typeorm/data-source.ts",
     "migrations:generate": "npm run typeorm -- migration:generate -n",
     "migrations:run": "npm run typeorm -- migration:run",
@@ -27,11 +28,34 @@
     "rxjs": "^7.8.0",
     "typeorm": "^0.3.28"
   },
+  "jest": {
+    "moduleFileExtensions": ["js", "json", "ts"],
+    "rootDir": "src",
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "testEnvironment": "node",
+    "watchman": false,
+    "collectCoverageFrom": [
+      "**/*.(t|j)s",
+      "!**/*.spec.(t|j)s",
+      "!**/node_modules/**",
+      "!**/dist/**",
+      "!**/migrations/**"
+    ],
+    "coverageDirectory": "./coverage",
+    "coverageReporters": ["text", "text-summary", "html", "lcov"]
+  },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
+    "@nestjs/testing": "^10.0.0",
     "@types/bcrypt": "^6.0.0",
     "@types/express": "^4.17.17",
+    "@types/jest": "^29.5.0",
     "@types/node": "^20.0.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.0.0"
   }

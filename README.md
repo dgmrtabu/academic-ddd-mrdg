@@ -51,7 +51,7 @@ docker run -d \
 ## 2. Clonar e instalar dependencias
 
 ```bash
-git clone <url-del-repositorio>
+git clone https://github.com/omarmus/academic-ddd.git
 cd academic-ddd
 
 # Instalar dependencias de todos los paquetes (workspaces)
@@ -180,6 +180,61 @@ npm run build
 # Tests de todos los workspaces
 npm run test
 ```
+
+### Tests e2e (Playwright)
+
+Los tests e2e cubren flujos completos con frontend y backend. **Antes de ejecutarlos** asegúrate de tener la app en marcha:
+
+```bash
+npm run dev
+```
+
+En otra terminal, desde la raíz del repo:
+
+```bash
+# Primera vez: descargar navegadores de Playwright
+npx playwright install
+
+# Ejecutar tests e2e (Chromium y Firefox)
+npm run test:e2e
+
+# Modo UI (depuración)
+npm run test:e2e:ui
+```
+
+La URL base por defecto es `http://localhost:5173`. Puedes cambiarla con `PLAYWRIGHT_BASE_URL`.
+
+---
+
+## Coverage (cobertura de código)
+
+Desde la **raíz del monorepo** puedes ejecutar el coverage de backend y frontend y ver en consola el listado de archivos con su estado (Stmts, Branch, Funcs, Lines):
+
+```bash
+npm run test:coverage
+```
+
+Se ejecuta primero el coverage del backend y luego el del frontend; en ambos se imprime la tabla por archivo y el resumen global.
+
+**Backend** (Jest), desde `packages/backend`:
+
+```bash
+cd packages/backend
+npm run test:cov
+```
+
+Genera el reporte en `packages/backend/coverage/` (HTML en `coverage/index.html`, más salida `text`/`text-summary`/`lcov` en consola).
+
+**Frontend** (Vitest + v8):
+
+```bash
+cd packages/frontend
+npm run test:coverage
+```
+
+Genera el reporte en `packages/frontend/coverage/` (HTML y formatos `text`, `text-summary`, `lcov`).
+
+La carpeta `coverage` está en `.gitignore`.
 
 ---
 
