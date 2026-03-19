@@ -17,6 +17,5 @@ export interface IScheduleRepository {
   save(schedule: Schedule): Promise<Schedule>;
   count(): Promise<number>;
   findPaginated(options: FindPaginatedOptions): Promise<{ data: Schedule[]; total: number }>;
-  // update(id: string, schedule: Schedule): Promise<Schedule | null>;
   delete(id: string): Promise<void>;
 }
