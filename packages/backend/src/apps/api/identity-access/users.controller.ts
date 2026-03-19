@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
   Body,
   Param,
   NotFoundException,
@@ -47,4 +48,19 @@ export class UsersController {
     const user = await this.userService.create(body);
     return toUserResponse(user);
   }
+
+
+  @Patch(':id/email')
+  async updateEmail(
+    @Param('id') id: string,
+    @Body('email') email:string
+  ) {
+    const user = await this.userService.updateEmail(id, email);
+    if (!user) throw new NotFoundException('User not found');
+    return user;
+  }
+ 
+
+
+
 }
