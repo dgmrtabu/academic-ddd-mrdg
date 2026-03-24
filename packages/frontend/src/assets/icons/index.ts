@@ -1,0 +1,17 @@
+export { IconUsers } from './IconUsers';
+export { IconAcademic } from './IconAcademic';
+export { IconCourses } from './IconCourses';
+export { IconCalendar } from './IconCalendar';
+export { IconUser } from './IconUser';
+export { IconClipboard } from './IconClipboard';
+export { IconAcademicCap } from './IconAcademicCap';
+export { IconLogout } from './IconLogout';
+export { IconMenu } from './IconMenu';
+export { IconBook } from './IconBook';
+export { IconSun } from './IconSun';
+export { IconMoon } from './IconMoon';
+export { IconClose } from './IconClose';
+export { IconBuilding } from './IconBuilding';
+export { IconChartBar } from './IconChartBar';
+export { IconEye } from './IconEye';
+export { IconEyeOff } from './IconEyeOff';

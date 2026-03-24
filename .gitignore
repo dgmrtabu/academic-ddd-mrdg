@@ -1,0 +1,23 @@
+node_modules
+dist
+build
+packages/backend/dist
+packages/backend/build
+packages/frontend/dist
+packages/frontend/build
+.env
+.env.local
+.env.*.local
+*.log
+.DS_Store
+coverage
+.idea
+.vscode
+*.tsbuildinfo
+
+# Playwright e2e
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+.playwright/
