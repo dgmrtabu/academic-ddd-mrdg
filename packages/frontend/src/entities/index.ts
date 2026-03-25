@@ -1,3 +1,11 @@
 export type { Student, CreateStudentDto, UpdateStudentDto } from './student';
-export type { LoginResult, LoginResponse } from './auth';
+export type { Classroom, CreateClassroomDto, UpdateClassroomDto } from './classroom';
+export type { Schedule, CreateScheduleDto, UpdateScheduleDto } from './schedule';
+export type {
+  LoginResult,
+  LoginResponse,
+  ChangePasswordDto,
+  ChangePasswordResponse,
+} from './auth';
 export type { User, Role } from './user';
+export type { Course } from './course';

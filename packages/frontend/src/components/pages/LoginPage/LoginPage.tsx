@@ -5,6 +5,7 @@ import { Button } from '../../atoms/Button';
 import { Input } from '../../atoms/Input';
 import { login } from '../../../services/authService';
 import { useAuthStore, type Role } from '../../../stores';
+import { trackEvent, trackPageView } from '../../../lib/analytics';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -13,6 +14,10 @@ export function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  if (typeof window !== 'undefined') {
+    trackPageView('/login', 'Login');
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,8 +38,11 @@ export function LoginPage() {
           email: result.user.email,
           role: result.user.role as Role,
         },
-        result.access_token,
       );
+      trackEvent('login', {
+        method: 'password',
+        user_role: result.user.role,
+      });
       navigate('/', { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al iniciar sesión');

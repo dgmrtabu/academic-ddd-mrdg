@@ -5,6 +5,7 @@ import { Button } from '../../atoms/Button';
 import { DataTable, type DataTableColumn } from '../../organisms/DataTable';
 import { getStudentsPaginated, deleteStudent, type Student } from '../../../services/studentService';
 import { formatDate } from '../../../lib';
+import { trackEvent, trackPageView } from '../../../lib/analytics';
 
 const STUDENT_COLUMNS: DataTableColumn<Student>[] = [
   { id: 'code', label: 'Código', sortable: true, value: (r) => r.code, render: (r) => <span className="font-medium text-slate-900 dark:text-slate-100">{r.code}</span> },
@@ -27,6 +28,10 @@ export function EstudiantesPage() {
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    trackPageView('/estudiantes', 'Listado de estudiantes');
+  }, []);
 
   const loadStudents = useCallback(async () => {
     setLoading(true);
@@ -60,6 +65,9 @@ export function EstudiantesPage() {
     setDeletingId(student.id);
     try {
       await deleteStudent(student.id);
+      trackEvent('student_delete', {
+        student_id: student.id,
+      });
       await loadStudents();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al eliminar');
@@ -72,7 +80,10 @@ export function EstudiantesPage() {
     <div className="flex items-center justify-end gap-2">
       <button
         type="button"
-        onClick={() => navigate(`/estudiantes/${student.id}/editar`)}
+        onClick={() => {
+          trackEvent('student_edit_click', { student_id: student.id });
+          navigate(`/estudiantes/${student.id}/editar`);
+        }}
         className="rounded-lg px-3 py-1.5 text-sm font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 dark:focus:ring-offset-slate-800"
       >
         Editar
@@ -95,7 +106,13 @@ export function EstudiantesPage() {
           <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
             Estudiantes
           </h2>
-          <Button type="button" onClick={() => navigate('/estudiantes/registro')}>
+          <Button
+            type="button"
+            onClick={() => {
+              trackEvent('student_create_click');
+              navigate('/estudiantes/registro');
+            }}
+          >
             Agregar estudiante
           </Button>
         </div>

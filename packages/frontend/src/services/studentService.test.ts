@@ -26,7 +26,11 @@ function mockRes(overrides: {
 }
 
 vi.mock('../stores', () => ({
-  getAuthHeaders: vi.fn(() => ({})),
+  useAuthStore: {
+    getState: () => ({
+      clearAuth: vi.fn(),
+    }),
+  },
 }));
 
 describe('studentService', () => {

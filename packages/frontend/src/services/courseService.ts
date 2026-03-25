@@ -4,7 +4,6 @@ export async function getCourses() {
   return await apiRequest('/courses');
 }
 
-
 export async function createCourse(data: {
   name: string;
   code: string;
