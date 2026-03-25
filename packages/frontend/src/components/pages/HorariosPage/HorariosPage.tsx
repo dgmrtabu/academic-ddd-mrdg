@@ -1,166 +1,149 @@
-import { useNavigate } from "react-router-dom";
-import { Schedule } from "../../../entities/schedule";
-import { trackEvent, trackPageView } from "../../../lib/analytics";
-import { Button } from "../../atoms/Button";
-import { DataTable, DataTableColumn } from "../../organisms/DataTable";
-import { MainLayout } from "../../templates/MainLayout";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { MainLayout } from '../../templates/MainLayout';
+import { Button } from '../../atoms/Button';
+import { DataTable, type DataTableColumn } from '../../organisms/DataTable';
+import { getCourses, type Course } from '../../../services/courseService';
 import {
+  getClassrooms,
+  type Classroom,
+} from '../../../services/classroomService';
+import {
+  getSchedules,
   deleteSchedule,
-  getSchedulesPaginated,
-} from "../../../services/scheduleService";
+  type Schedule,
+} from '../../../services/scheduleService';
 
-const SCHEDULE_COLUMNS: DataTableColumn<Schedule>[] = [
-  {
-    id: "courseName",
-    label: "Curso",
-    sortable: true,
-    value: (r) => r.courseName,
-    render: (r) => (
-      <span className="font-medium text-slate-900 dark:text-slate-100">
-        {r.courseName}
-      </span>
-    ),
-  },
-  {
-    id: "slot",
-    label: "Horario",
-    sortable: true,
-    value: (r) => r.slot,
-  },
+type ScheduleRow = Schedule & {
+  courseLabel: string;
+  classroomLabel: string;
+};
+
+const SCHEDULE_COLUMNS: DataTableColumn<ScheduleRow>[] = [
+  { id: 'course', label: 'Curso', value: (row) => row.courseLabel },
+  { id: 'slot', label: 'Horario', value: (row) => row.slot },
+  { id: 'classroom', label: 'Aula', value: (row) => row.classroomLabel },
 ];
 
 export function HorariosPage() {
   const navigate = useNavigate();
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [classrooms, setClassrooms] = useState<Classroom[]>([]);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
-  const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [sortKey, setSortKey] = useState<string | null>("createdAt");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    trackPageView("/horarios", "Lista de horarios");
-  }, []);
-
-  const loadSchedules = useCallback(async () => {
+  const loadData = async () => {
     setLoading(true);
     try {
-      const res = await getSchedulesPaginated({
-        page,
-        pageSize,
-        sortBy: sortKey ?? undefined,
-        sortOrder: sortDir,
-      });
-      setSchedules(res.data);
-      setTotal(res.total);
+      const [courseRows, classroomRows, scheduleRows] = await Promise.all([
+        getCourses(),
+        getClassrooms(),
+        getSchedules(),
+      ]);
+      setCourses(courseRows);
+      setClassrooms(classroomRows);
+      setSchedules(scheduleRows);
+      setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al cargar horarios");
-      setSchedules([]);
-      setTotal(0);
+      setError(err instanceof Error ? err.message : 'Error al cargar horarios');
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, sortKey, sortDir]);
+  };
 
   useEffect(() => {
-    loadSchedules();
-  }, [loadSchedules]);
+    void loadData();
+  }, []);
 
-  const handleDelete = async (schedule: Schedule) => {
-    if (
-      !window.confirm(
-        `¿Eliminar a ${schedule.courseName} ${schedule.slot}? Esta acción no se puede deshacer.`,
-      )
-    ) {
-      return;
-    }
+  const rows: ScheduleRow[] = schedules.map((schedule) => {
+    const course = courses.find((item) => item.id === schedule.courseId);
+    const classroom = classrooms.find((item) => item.id === schedule.classroomId);
+
+    return {
+      ...schedule,
+      courseLabel: course ? `${course.code} - ${course.name}` : schedule.courseId,
+      classroomLabel: classroom
+        ? `${classroom.code} - ${classroom.building}`
+        : 'Sin aula',
+    };
+  });
+
+  const handleDelete = async (row: ScheduleRow) => {
+    if (!window.confirm(`Eliminar el horario "${row.slot}"?`)) return;
+
+    setDeletingId(row.id);
     setError(null);
-    setDeletingId(schedule.id);
+
     try {
-      await deleteSchedule(schedule.id);
-      trackEvent("schedule_delete", {
-        schedule_id: schedule.id,
-      });
-      await loadSchedules();
+      await deleteSchedule(row.id);
+      await loadData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al eliminar");
+      setError(err instanceof Error ? err.message : 'Error al eliminar horario');
     } finally {
       setDeletingId(null);
     }
   };
 
-  const renderActions = (schedule: Schedule) => (
-    <div className="flex items-center justify-end gap-2">
-      <button
-        type="button"
-        onClick={() => {
-          trackEvent("schedule_edit_click", { schedule_id: schedule.id });
-          navigate(`/horarios/${schedule.id}/editar`);
-        }}
-        className="rounded-lg px-3 py-1.5 text-sm font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 dark:focus:ring-offset-slate-800"
-      >
-        Editar
-      </button>
-      <button
-        type="button"
-        onClick={() => handleDelete(schedule)}
-        disabled={deletingId === schedule.id}
-        className="rounded-lg px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 dark:focus:ring-offset-slate-800 disabled:opacity-50"
-      >
-        {deletingId === schedule.id ? "Eliminando…" : "Eliminar"}
-      </button>
-    </div>
-  );
-
   return (
     <MainLayout>
-      <div className="rounded-2xl border border-slate-200/80 bg-white p-8 shadow-sm ring-1 ring-slate-200/50 dark:border-slate-600 dark:bg-slate-800/95 dark:ring-slate-600/50 sm:p-10">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
-            Horarios
-          </h2>
-          <Button
-            type="button"
-            onClick={() => {
-              trackEvent("schedule_create_click");
-              navigate("/horarios/registro");
-            }}
-          >
+      <section className="rounded-2xl border border-slate-200/80 bg-white p-8 shadow-sm ring-1 ring-slate-200/50 dark:border-slate-600 dark:bg-slate-800/95 dark:ring-slate-600/50 sm:p-10">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
+              Horarios
+            </h2>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+              Administra los horarios y el aula asignada a cada curso.
+            </p>
+          </div>
+          <Button type="button" onClick={() => navigate('/horarios/registro')}>
             Agregar horario
           </Button>
         </div>
+
         <div className="mt-6">
-          <DataTable<Schedule>
+          <DataTable<ScheduleRow>
             columns={SCHEDULE_COLUMNS}
-            data={schedules}
-            total={total}
-            page={page}
-            pageSize={pageSize}
-            sortKey={sortKey}
-            sortDir={sortDir}
-            onPageChange={setPage}
-            onPageSizeChange={setPageSize}
-            onSortChange={(key, dir) => {
-              setSortKey(key);
-              setSortDir(dir);
-            }}
-            loading={loading}
+            data={rows}
             keyExtractor={(row) => row.id}
-            renderActions={renderActions}
-            defaultPageSize={10}
+            defaultPageSize={50}
             emptyMessage="No hay horarios registrados."
+            renderActions={(row) => (
+              <div className="flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => navigate(`/horarios/${row.id}/editar`)}
+                  className="rounded-lg px-3 py-1.5 text-sm font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30"
+                >
+                  Editar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void handleDelete(row)}
+                  disabled={deletingId === row.id}
+                  className="rounded-lg px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30 disabled:opacity-50"
+                >
+                  {deletingId === row.id ? 'Eliminando...' : 'Eliminar'}
+                </button>
+              </div>
+            )}
           />
         </div>
+
+        {loading && (
+          <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
+            Cargando...
+          </p>
+        )}
+
         {error && (
-          <p className="mt-4 text-sm text-red-600 bg-red-50 dark:text-red-300 dark:bg-red-900/30 rounded-lg px-3 py-2">
+          <p className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-900/30 dark:text-red-300">
             {error}
           </p>
         )}
-      </div>
+      </section>
     </MainLayout>
   );
 }

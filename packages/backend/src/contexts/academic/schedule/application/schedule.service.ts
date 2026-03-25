@@ -192,17 +192,28 @@ export class ScheduleService {
     return this.scheduleRepository.findById(id);
   }
 
-  async create(data: { courseId: string; slot: string }): Promise<Schedule> {
+  async create(data: {
+    courseId: string;
+    slot: string;
+    classroomId: string;
+  }): Promise<Schedule> {
     await this.validateCourseExists(data.courseId);
     await this.validateNoDuplicate(data.courseId, data.slot);
     await this.validateNoOverlap(data.courseId, data.slot);
 
     const id = crypto.randomUUID();
-    const schedule = new Schedule(id, data.courseId, data.slot);
+    const schedule = new Schedule(id, data.courseId, data.slot, data.classroomId);
     return this.scheduleRepository.save(schedule);
   }
 
-  async update(id: string, data:{ slot?: string, courseId?: string}): Promise<Schedule | null>{
+  async update(
+    id: string,
+    data: {
+      courseId?: string;
+      slot?: string;
+      classroomId?: string;
+    },
+  ): Promise<Schedule | null> {
     const schedule = await this.scheduleRepository.findById(id);
     if (!schedule) return null;
 
@@ -220,7 +231,8 @@ export class ScheduleService {
     const updated = new Schedule(
       schedule.id,
       courseId,
-      slot
+      slot,
+      data.classroomId ?? schedule.classroomId,
     );
     
     await this.scheduleRepository.save(updated);

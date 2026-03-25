@@ -2,16 +2,15 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
+  Delete,
   Body,
   Param,
   NotFoundException,
-  Patch,
-  Delete,
   Query,
 } from '@nestjs/common';
 import { ScheduleService } from '../../../contexts/academic/schedule/application/schedule.service';
 import { ScheduleSortField } from '../../../contexts/academic/schedule/domain/schedule.repository';
-import { CreateScheduleDTO, UpdateScheduleDTO } from '../../../contexts/academic/schedule/application/dtos';
 
 const SORT_FIELDS: ScheduleSortField[] = ['slot', 'createdAt', 'courseName'];
 
@@ -49,16 +48,22 @@ export class SchedulesController {
   }
 
   @Post()
-  async create(@Body() body: CreateScheduleDTO) {
+  async create(
+    @Body() body: { courseId: string; slot: string; classroomId: string },
+  ) {
     return this.scheduleService.create(body);
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() body: UpdateScheduleDTO){
-      const schedule = await this.scheduleService.update(id, body);
-      if (!schedule) throw new NotFoundException('Schedule not found');
-      return schedule;
-    }
+  async update(
+    @Param('id') id: string,
+    @Body()
+    body: { courseId?: string; slot?: string; classroomId?: string },
+  ) {
+    const schedule = await this.scheduleService.update(id, body);
+    if (!schedule) throw new NotFoundException('Schedule not found');
+    return schedule;
+  }
 
   @Delete(':id')
   async remove(@Param('id') id: string) {

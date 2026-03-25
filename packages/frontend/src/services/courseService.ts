@@ -1,6 +1,5 @@
-import { Course } from '../entities';
 import { apiRequest } from '../lib';
-
+import { Course } from '../entities';
 export type { Course } from '../entities';
 
 export async function getCourses(): Promise<Course[]> {

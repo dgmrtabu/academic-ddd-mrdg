@@ -1,5 +1,9 @@
-import { CreateScheduleDto, Schedule, UpdateScheduleDto } from '../entities';
 import { apiRequest } from '../lib';
+import type {
+  Schedule,
+  CreateScheduleDto,
+  UpdateScheduleDto,
+} from '../entities';
 
 export type { Schedule, CreateScheduleDto, UpdateScheduleDto } from '../entities';
 
@@ -28,14 +32,6 @@ export async function getSchedulesPaginated(
   });
 }
 
-export async function createSchedule(data: CreateScheduleDto): Promise<Schedule> {
-  return apiRequest<Schedule>('/schedules', {
-    method: 'POST',
-    body: JSON.stringify(data),
-    defaultErrorMessage: 'Error al registrar horario',
-  });
-}
-
 export async function getSchedules(): Promise<Schedule[]> {
   return apiRequest<Schedule[]>('/schedules', {
     defaultErrorMessage: 'Error al cargar horarios',
@@ -52,6 +48,14 @@ export async function getSchedule(id: string): Promise<Schedule> {
       throw new Error('Horario no encontrado');
     throw err;
   }
+}
+
+export async function createSchedule(data: CreateScheduleDto): Promise<Schedule> {
+  return apiRequest<Schedule>('/schedules', {
+    method: 'POST',
+    body: JSON.stringify(data),
+    defaultErrorMessage: 'Error al crear horario',
+  });
 }
 
 export async function updateSchedule(

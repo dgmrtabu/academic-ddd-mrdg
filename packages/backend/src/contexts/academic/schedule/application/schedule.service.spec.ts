@@ -17,9 +17,21 @@ describe('ScheduleService', () => {
   let courseService: {
     findById: jest.Mock;
   };
+  
+  const schedule = new Schedule(
+    'schedule-1',
+    'course-1',
+    'Lunes 08:00-10:00',
+    'classroom-1',
+  );
 
   const mockCourse = { id: 'course-1', name: 'Matemática' };
-  const mockSchedule = new Schedule('schedule-1', 'course-1', 'Lunes 09:00-11:00');
+  const mockSchedule = new Schedule(
+    'schedule-1',
+    'course-1',
+    'Lunes 09:00-11:00',
+    'classroom-1',
+  );
 
   beforeEach(async () => {
     scheduleRepo = {
@@ -70,7 +82,11 @@ describe('ScheduleService', () => {
   });
 
   describe('create', () => {
-    const createData = { courseId: 'course-1', slot: 'Lunes 09:00-11:00' };
+    const createData = {
+      courseId: 'course-1',
+      slot: 'Lunes 09:00-11:00',
+      classroomId: 'classroom-1',
+    };
 
     beforeEach(() => {
       courseService.findById.mockResolvedValue(mockCourse);
@@ -103,7 +119,7 @@ describe('ScheduleService', () => {
 
     it('debería lanzar si hay horarios superpuestos', async () => {
       scheduleRepo.findAll.mockResolvedValue([
-        new Schedule('s1', 'course-1', 'Lunes 08:00-10:00'),
+        new Schedule('s1', 'course-1', 'Lunes 08:00-10:00', 'classroom-2'),
       ]);
       await expect(service.create(createData)).rejects.toThrow(BadRequestException);
       await expect(service.create(createData)).rejects.toThrow(
