@@ -12,8 +12,3 @@ export type CreateScheduleDto = {
 };
 
 export type UpdateScheduleDto = Partial<CreateScheduleDto>;
-    id: string,
-    courseId: string,
-    courseName?: string,
-    slot: string, 
-}

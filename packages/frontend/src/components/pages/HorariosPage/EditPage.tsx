@@ -1,22 +1,29 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { MainLayout } from "../../templates/MainLayout";
-import { Button } from "../../atoms/Button";
-import { Input } from "../../atoms/Input";
-import { getSchedule, updateSchedule } from "../../../services/scheduleService";
-import { getCourses, type Course } from "../../../services/courseService";
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { MainLayout } from '../../templates/MainLayout';
+import { Button } from '../../atoms/Button';
+import { Input } from '../../atoms/Input';
+import { getSchedule, updateSchedule } from '../../../services/scheduleService';
+import { getCourses, type Course } from '../../../services/courseService';
+import {
+  getClassrooms,
+  type Classroom,
+} from '../../../services/classroomService';
 
 export function EditPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [courses, setCourses] = useState<Course[]>([]);
-  const [courseId, setCourseId] = useState("");
-  const [dayOfWeek, setDayOfWeek] = useState("");
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
+  const [classrooms, setClassrooms] = useState<Classroom[]>([]);
+  const [courseId, setCourseId] = useState('');
+  const [classroomId, setClassroomId] = useState('');
+  const [dayOfWeek, setDayOfWeek] = useState('');
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [coursesLoading, setCoursesLoading] = useState(true);
+  const [classroomsLoading, setClassroomsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -26,31 +33,48 @@ export function EditPage() {
         setCourses(data);
       } catch (err) {
         setError(
-          err instanceof Error ? err.message : "Error al cargar los cursos",
+          err instanceof Error ? err.message : 'Error al cargar los cursos',
         );
       } finally {
         setCoursesLoading(false);
       }
     };
-    fetchCourses();
+    void fetchCourses();
+  }, []);
+
+  useEffect(() => {
+    const fetchClassrooms = async () => {
+      try {
+        const data = await getClassrooms();
+        setClassrooms(data);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : 'Error al cargar las aulas',
+        );
+      } finally {
+        setClassroomsLoading(false);
+      }
+    };
+    void fetchClassrooms();
   }, []);
 
   useEffect(() => {
     if (!id) return;
-    (async () => {
+    void (async () => {
       try {
         const schedule = await getSchedule(id);
         setCourseId(schedule.courseId);
+        setClassroomId(schedule.classroomId ?? '');
 
-        const slotParts = schedule.slot.split(" ");
+        const slotParts = schedule.slot.split(' ');
         const day = slotParts[0];
-        const timeParts = slotParts[1]?.split("-") ?? [];
+        const timeParts = slotParts[1]?.split('-') ?? [];
 
         setDayOfWeek(day);
-        setStartTime(timeParts[0] ?? "");
-        setEndTime(timeParts[1] ?? "");
+        setStartTime(timeParts[0] ?? '');
+        setEndTime(timeParts[1] ?? '');
       } catch {
-        setError("No se pudo cargar el horario");
+        setError('No se pudo cargar el horario');
       } finally {
         setLoadingData(false);
       }
@@ -58,12 +82,14 @@ export function EditPage() {
   }, [id]);
 
   const validateForm = (): string | null => {
-    if (!courseId) return "Selecciona un curso";
-    if (!dayOfWeek) return "Selecciona un día de la semana";
-    if (!startTime) return "Ingresa la hora de inicio";
-    if (!endTime) return "Ingresa la hora de fin";
-    if (startTime >= endTime)
-      return "La hora de fin debe ser mayor que la hora de inicio";
+    if (!courseId) return 'Selecciona un curso';
+    if (!classroomId) return 'Selecciona un aula';
+    if (!dayOfWeek) return 'Selecciona un dia de la semana';
+    if (!startTime) return 'Ingresa la hora de inicio';
+    if (!endTime) return 'Ingresa la hora de fin';
+    if (startTime >= endTime) {
+      return 'La hora de fin debe ser mayor que la hora de inicio';
+    }
     return null;
   };
 
@@ -82,11 +108,12 @@ export function EditPage() {
     try {
       await updateSchedule(id, {
         courseId: courseId.trim(),
-        slot: dayOfWeek.trim() + " " + startTime.trim() + "-" + endTime.trim(),
+        slot: `${dayOfWeek.trim()} ${startTime.trim()}-${endTime.trim()}`,
+        classroomId: classroomId.trim(),
       });
-      navigate("/horarios", { state: { updated: true } });
+      navigate('/horarios', { state: { updated: true } });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al actualizar");
+      setError(err instanceof Error ? err.message : 'Error al actualizar');
     } finally {
       setLoading(false);
     }
@@ -95,8 +122,8 @@ export function EditPage() {
   if (loadingData) {
     return (
       <MainLayout>
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-8 shadow-sm ring-1 ring-slate-200/50 dark:border-slate-600 dark:bg-slate-800/95 dark:ring-slate-600/50 sm:p-10 w-full">
-          <p className="text-slate-600 dark:text-slate-300">Cargando…</p>
+        <div className="w-full rounded-2xl border border-slate-200/80 bg-white p-8 shadow-sm ring-1 ring-slate-200/50 dark:border-slate-600 dark:bg-slate-800/95 dark:ring-slate-600/50 sm:p-10">
+          <p className="text-slate-600 dark:text-slate-300">Cargando...</p>
         </div>
       </MainLayout>
     );
@@ -104,19 +131,19 @@ export function EditPage() {
 
   return (
     <MainLayout>
-      <div className="rounded-2xl border border-slate-200/80 bg-white p-8 shadow-sm ring-1 ring-slate-200/50 dark:border-slate-600 dark:bg-slate-800/95 dark:ring-slate-600/50 sm:p-10 w-full">
+      <div className="w-full rounded-2xl border border-slate-200/80 bg-white p-8 shadow-sm ring-1 ring-slate-200/50 dark:border-slate-600 dark:bg-slate-800/95 dark:ring-slate-600/50 sm:p-10">
         <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
           Editar horario
         </h2>
-        <p className="mt-2 text-slate-600 dark:text-slate-300 text-sm">
+        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
           Modifica los datos del horario.
         </p>
         <form onSubmit={handleSubmit} className="mt-6 w-full xl:max-w-[70%]">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
+          <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
             <div>
               <label
                 htmlFor="course"
-                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5"
+                className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300"
               >
                 Curso
               </label>
@@ -129,21 +156,48 @@ export function EditPage() {
                 className="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 shadow-sm hover:border-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500 dark:hover:border-slate-500 dark:focus:border-indigo-500 dark:focus:ring-indigo-500 disabled:bg-slate-50 dark:disabled:bg-slate-700"
               >
                 <option value="">
-                  {coursesLoading ? "Cargando…" : "Selecciona un curso"}
+                  {coursesLoading ? 'Cargando...' : 'Selecciona un curso'}
                 </option>
                 {courses.map((course) => (
                   <option key={course.id} value={course.id}>
-                    {course.name}
+                    {course.code} - {course.name}
                   </option>
                 ))}
               </select>
             </div>
+
+            <div>
+              <label
+                htmlFor="classroom"
+                className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300"
+              >
+                Aula
+              </label>
+              <select
+                id="classroom"
+                required
+                value={classroomId}
+                onChange={(e) => setClassroomId(e.target.value)}
+                disabled={classroomsLoading}
+                className="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 shadow-sm hover:border-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500 dark:hover:border-slate-500 dark:focus:border-indigo-500 dark:focus:ring-indigo-500 disabled:bg-slate-50 dark:disabled:bg-slate-700"
+              >
+                <option value="">
+                  {classroomsLoading ? 'Cargando...' : 'Selecciona un aula'}
+                </option>
+                {classrooms.map((classroom) => (
+                  <option key={classroom.id} value={classroom.id}>
+                    {classroom.code} - {classroom.building}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div>
               <label
                 htmlFor="dayOfWeek"
-                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5"
+                className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300"
               >
-                Día de la semana
+                Dia de la semana
               </label>
               <select
                 id="dayOfWeek"
@@ -152,7 +206,7 @@ export function EditPage() {
                 onChange={(e) => setDayOfWeek(e.target.value)}
                 className="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 shadow-sm hover:border-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500 dark:hover:border-slate-500 dark:focus:border-indigo-500 dark:focus:ring-indigo-500"
               >
-                <option value="">Selecciona un día</option>
+                <option value="">Selecciona un dia</option>
                 <option value="Lunes">Lunes</option>
                 <option value="Martes">Martes</option>
                 <option value="Miércoles">Miércoles</option>
@@ -162,10 +216,11 @@ export function EditPage() {
                 <option value="Domingo">Domingo</option>
               </select>
             </div>
+
             <div>
               <label
                 htmlFor="startTime"
-                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5"
+                className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300"
               >
                 Hora de inicio
               </label>
@@ -177,10 +232,11 @@ export function EditPage() {
                 onChange={(e) => setStartTime(e.target.value)}
               />
             </div>
+
             <div>
               <label
                 htmlFor="endTime"
-                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5"
+                className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300"
               >
                 Hora de fin
               </label>
@@ -193,19 +249,24 @@ export function EditPage() {
               />
             </div>
           </div>
+
           {error && (
-            <p className="mt-5 text-sm text-red-600 bg-red-50 dark:text-red-300 dark:bg-red-900/30 rounded-lg px-3 py-2">
+            <p className="mt-5 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-900/30 dark:text-red-300">
               {error}
             </p>
           )}
+
           <div className="flex gap-3 pt-6">
-            <Button type="submit" disabled={loading || coursesLoading}>
-              {loading ? "Guardando…" : "Guardar cambios"}
+            <Button
+              type="submit"
+              disabled={loading || coursesLoading || classroomsLoading}
+            >
+              {loading ? 'Guardando...' : 'Guardar cambios'}
             </Button>
             <button
               type="button"
-              onClick={() => navigate("/horarios")}
-              className="inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-slate-700 bg-white border border-slate-300 shadow-sm hover:bg-slate-50 dark:text-slate-200 dark:bg-slate-800 dark:border-slate-600 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900"
+              onClick={() => navigate('/horarios')}
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 dark:focus:ring-offset-slate-900"
             >
               Cancelar
             </button>

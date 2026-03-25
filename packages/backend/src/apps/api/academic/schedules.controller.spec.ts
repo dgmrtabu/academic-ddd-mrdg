@@ -6,8 +6,9 @@ import { Schedule } from '../../../contexts/academic/schedule/domain/schedule.en
 
 describe('SchedulesController', () => {
   let controller: SchedulesController;
-  let scheduleService: {  
-    findAll: jest.Mock;
+  let scheduleService: {
+    findAllWithCourseInfo: jest.Mock;
+    findPaginatedWithUserInfo: jest.Mock;
     findById: jest.Mock;
     create: jest.Mock;
     update: jest.Mock;
@@ -20,7 +21,12 @@ describe('SchedulesController', () => {
     'Lunes 08:00-10:00',
     'classroom-1',
   );
-  const mockSchedule = new Schedule('schedule-1', 'course-1', 'Lunes 09:00-11:00');
+  const mockSchedule = new Schedule(
+    'schedule-1',
+    'course-1',
+    'Lunes 09:00-11:00',
+    'classroom-1',
+  );
   const mockScheduleWithCourse = {
     ...mockSchedule,
     courseName: 'Matemática',
@@ -28,7 +34,6 @@ describe('SchedulesController', () => {
 
   beforeEach(async () => {
     scheduleService = {
-      findAll: jest.fn(),
       findAllWithCourseInfo: jest.fn(),
       findPaginatedWithUserInfo: jest.fn(),
       findById: jest.fn(),
@@ -88,7 +93,11 @@ describe('SchedulesController', () => {
 
   describe('create', () => {
     it('debería crear un horario y devolverlo', async () => {
-      const body = { courseId: 'course-1', slot: 'Lunes 09:00-11:00' };
+      const body = {
+        courseId: 'course-1',
+        slot: 'Lunes 09:00-11:00',
+        classroomId: 'classroom-1',
+      };
       scheduleService.create.mockResolvedValue(mockSchedule);
       const result = await controller.create(body);
       expect(scheduleService.create).toHaveBeenCalledWith(body);
@@ -98,8 +107,13 @@ describe('SchedulesController', () => {
 
   describe('update', () => {
     it('debería actualizar y devolver el horario', async () => {
-      const body = { slot: 'Martes 14:00-16:00' };
-      const updated = new Schedule('schedule-1', 'course-1', 'Martes 14:00-16:00');
+      const body = { slot: 'Martes 14:00-16:00', classroomId: 'classroom-2' };
+      const updated = new Schedule(
+        'schedule-1',
+        'course-1',
+        'Martes 14:00-16:00',
+        'classroom-2',
+      );
       scheduleService.update.mockResolvedValue(updated);
       const result = await controller.update('schedule-1', body);
       expect(scheduleService.update).toHaveBeenCalledWith('schedule-1', body);

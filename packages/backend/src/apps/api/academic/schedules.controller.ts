@@ -7,13 +7,10 @@ import {
   Body,
   Param,
   NotFoundException,
-  Patch,
-  Delete,
   Query,
 } from '@nestjs/common';
 import { ScheduleService } from '../../../contexts/academic/schedule/application/schedule.service';
 import { ScheduleSortField } from '../../../contexts/academic/schedule/domain/schedule.repository';
-import { CreateScheduleDTO, UpdateScheduleDTO } from '../../../contexts/academic/schedule/application/dtos';
 
 const SORT_FIELDS: ScheduleSortField[] = ['slot', 'createdAt', 'courseName'];
 

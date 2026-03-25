@@ -61,7 +61,4 @@ export class ScheduleTypeOrmRepository implements IScheduleRepository {
       return { data: rows.map((r) => this.toDomain(r)), total };
     }
 
-  async delete(id: string): Promise<void> {
-    await this.repo.delete(id);
-  }
 }

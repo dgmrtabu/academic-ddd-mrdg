@@ -232,7 +232,7 @@ export class ScheduleService {
       schedule.id,
       courseId,
       slot,
-      classroomId: data.classroomId ?? schedule.classroomId;
+      data.classroomId ?? schedule.classroomId,
     );
     
     await this.scheduleRepository.save(updated);
