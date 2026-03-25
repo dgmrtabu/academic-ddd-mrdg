@@ -21,7 +21,8 @@ test.describe('Aulas y horarios (e2e)', () => {
   test('crea, edita y elimina aulas y horarios', async ({ page }) => {
     const code1 = `LAB-${suffix()}`;
     const code2 = `LAB-${suffix()}`;
-    const updatedSlot = `Sabado 07:00-09:00 ${suffix()}`;
+    const createdSlot = 'Viernes 18:00-20:00';
+    const updatedSlot = 'Sábado 07:00-09:00';
 
     await page.goto('/aulas');
     await expect(page.getByRole('heading', { name: /aulas/i })).toBeVisible();
@@ -46,16 +47,20 @@ test.describe('Aulas y horarios (e2e)', () => {
     await expect(page.getByRole('heading', { name: /horarios/i })).toBeVisible();
 
     await page.getByLabel(/curso/i).selectOption({ label: 'MAT - MATEMATICA' });
-    await page.getByLabel(/franja horaria/i).fill('Viernes 18:00-20:00');
+    await page.getByLabel(/d[ií]a/i).selectOption('Viernes');
+    await page.getByLabel(/hora inicio/i).fill('18:00');
+    await page.getByLabel(/hora fin/i).fill('20:00');
     await page.getByLabel(/^aula$/i).selectOption({ label: `${code1} - Bloque E` });
     await page.getByRole('button', { name: /crear horario/i }).click();
 
-    const scheduleRow = page.locator('tbody tr').filter({ hasText: 'Viernes 18:00-20:00' });
+    const scheduleRow = page.locator('tbody tr').filter({ hasText: createdSlot });
     await expect(scheduleRow).toBeVisible();
     await expect(scheduleRow).toContainText(code1);
 
     await scheduleRow.getByRole('button', { name: /editar/i }).click();
-    await page.getByLabel(/franja horaria/i).fill(updatedSlot);
+    await page.getByLabel(/d[ií]a/i).selectOption('Sábado');
+    await page.getByLabel(/hora inicio/i).fill('07:00');
+    await page.getByLabel(/hora fin/i).fill('09:00');
     await page.getByLabel(/^aula$/i).selectOption({ label: `${code2} - Bloque F` });
     await page.getByRole('button', { name: /actualizar horario/i }).click();
 
