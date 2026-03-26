@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MainLayout } from '../../templates/MainLayout';
 import { Button } from '../../atoms/Button';
-import { DataTable, type DataTableColumn } from '../../organisms/DataTable';
-import { getCourses, type Course } from '../../../services/courseService';
+import { DataTable, DataTableColumn } from '../../organisms/DataTable';
+import { getCourses } from '../../../services/courseService';
+import { Course } from '../../../entities';
 import {
   getClassrooms,
   type Classroom,
