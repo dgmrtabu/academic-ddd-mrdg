@@ -10,6 +10,7 @@ import { AulasPage } from './components/pages/AulasPage';
 import { MiPerfilPage } from './components/pages/MiPerfilPage';
 import { MisClasesPage } from './components/pages/MisClasesPage';
 import { PlaceholderPage } from './components/pages/PlaceholderPage';
+import { DepartamentosPage } from './components/pages/DepartamentosPage';
 import {
   HorariosPage,
   RegisterPage as HorariosRegisterPage,
@@ -47,7 +48,7 @@ function App() {
           <Route path="/profesores" element={<PlaceholderPage title="Profesores" />} />
           <Route path="/periodos-academicos" element={<PlaceholderPage title="Períodos académicos" />} />
           <Route path="/programas" element={<PlaceholderPage title="Programas" />} />
-          <Route path="/departamentos" element={<PlaceholderPage title="Departamentos" />} />
+          <Route path="/departamentos" element={<DepartamentosPage />} />
           <Route path="/oferta-cursos" element={<PlaceholderPage title="Oferta de cursos" />} />
           <Route path="/calificaciones" element={<PlaceholderPage title="Calificaciones" />} />
           <Route path="/prerrequisitos" element={<PlaceholderPage title="Prerrequisitos" />} />
