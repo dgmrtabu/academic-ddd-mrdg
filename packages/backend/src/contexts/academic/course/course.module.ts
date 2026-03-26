@@ -12,7 +12,7 @@ import { CourseEntity } from './infrastructure/persistence/course.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([CourseEntity, CourseTypeOrmEntity, CourseResourceTypeOrmEntity]),
+    TypeOrmModule.forFeature([CourseTypeOrmEntity, CourseResourceTypeOrmEntity, CourseEntity]),
   ],
   providers: [
     CourseService,
