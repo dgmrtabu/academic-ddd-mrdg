@@ -9,15 +9,11 @@ export async function login(
   username: string,
   password: string,
 ): Promise<LoginResponse> {
-  const res = await login(username, password);
-localStorage.setItem('token', res.access_token);
   try {
     return await apiRequest<LoginResponse>('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ username: username.trim(), password }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      defaultErrorMessage: 'Error al iniciar sesión',
     });
   } catch (err) {
     const message =
