@@ -8,10 +8,11 @@ import { CourseResourceTypeOrmEntity } from './infrastructure/course-resource-ty
 import { CourseResourceTypeOrmRepository } from './infrastructure/course-resource-typeorm.repository';
 import { CourseTypeOrmEntity } from './infrastructure/course-typeorm.entity';
 import { CourseTypeOrmRepository } from './infrastructure/course-typeorm.repository';
+import { CourseEntity } from './infrastructure/persistence/course.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([CourseTypeOrmEntity, CourseResourceTypeOrmEntity]),
+    TypeOrmModule.forFeature([CourseTypeOrmEntity, CourseResourceTypeOrmEntity, CourseEntity]),
   ],
   providers: [
     CourseService,
