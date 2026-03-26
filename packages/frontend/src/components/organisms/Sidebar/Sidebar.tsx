@@ -79,7 +79,13 @@ type SidebarProps = {
 function SidebarNavContent({ onNavigate }: { onNavigate?: () => void }) {
   const user = useAuthStore((s) => s.user);
   const clearAuth = useAuthStore((s) => s.clearAuth);
-  const items = user ? MENU_BY_ROLE[user.role.name as Role] : [];
+  const role =
+    user && typeof (user as any).role === 'string'
+      ? ((user as any).role as Role)
+      : user
+        ? (((user as any).role?.name as Role) ?? undefined)
+        : undefined;
+  const items = role ? MENU_BY_ROLE[role] ?? [] : [];
 
   if (items.length === 0) return null;
 
@@ -114,7 +120,13 @@ function SidebarNavContent({ onNavigate }: { onNavigate?: () => void }) {
 
 export function Sidebar({ open = false, onClose }: SidebarProps) {
   const user = useAuthStore((s) => s.user);
-  const items = user ? MENU_BY_ROLE[user.role.name as Role] : [];
+  const role =
+    user && typeof (user as any).role === 'string'
+      ? ((user as any).role as Role)
+      : user
+        ? (((user as any).role?.name as Role) ?? undefined)
+        : undefined;
+  const items = role ? MENU_BY_ROLE[role] ?? [] : [];
 
   if (items.length === 0) return null;
 

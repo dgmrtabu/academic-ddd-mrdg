@@ -60,7 +60,7 @@ export class UsersController {
       throw new NotFoundException('Usario no encontrado');
     }
 
-    return toUserResponse(user);
+    return toUserResponse(user, [] as Role[]);
   }
 
   @Get(':id')
