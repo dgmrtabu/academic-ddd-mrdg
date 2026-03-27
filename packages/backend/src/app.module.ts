@@ -34,8 +34,10 @@ import { ApiModule } from './apps/api/api.module';
         type: 'postgres',
         url: process.env.DATABASE_URL,
         autoLoadEntities: true,
-        synchronize: false,
-        ssl: { rejectUnauthorized: false },        
+        synchronize: true,
+        ssl: {
+          rejectUnauthorized: false,
+        },      
       }),
     }),
     ApiModule,
