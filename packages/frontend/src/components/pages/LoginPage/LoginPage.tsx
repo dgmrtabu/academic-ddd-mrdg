@@ -29,18 +29,16 @@ export function LoginPage() {
     setLoading(true);
     try {
       const result = await login(username, password);
-      setAuth(
-        {
-          id: result.user.id,
-          username: result.user.username,
-          name: result.user.username,
-          email: result.user.email,
-          role: {
-            id: '',
-            name: result.user.role,
-          },
+      setAuth({
+        id: result.user.id,
+        username: result.user.username,
+        name: result.user.username,
+        email: result.user.email,
+        role: {
+          id: '',
+          name: result.user.role,
         },
-      );
+      });
       trackEvent('login', {
         method: 'password',
         user_role: result.user.role,

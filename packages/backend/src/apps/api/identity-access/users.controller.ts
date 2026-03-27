@@ -39,13 +39,28 @@ export class UsersController {
   constructor(
     private readonly userService: UserService,
     private readonly roleService: RoleService,
-  ) {}
+  ) { }
 
   @Get()
   async findAll() {
     const users = await this.userService.findAll();
     const roles = await this.roleService.findAll();
     return users.map((user) => toUserResponse(user, roles));
+  }
+
+  @Get('me')
+  async findCurrentUser(@Req() req: AuthenticatedRequest) {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new UnauthorizedException('No autorizado');
+    }
+
+    const user = await this.userService.findById(userId);
+    if (!user) {
+      throw new NotFoundException('Usario no encontrado');
+    }
+
+    return toUserResponse(user, [] as Role[]);
   }
 
   @Get(':id')
@@ -94,6 +109,15 @@ export class UsersController {
     return { success: true };
   }
 
+  @Patch(':id/email')
+  async updateEmail(
+    @Param('id') id: string,
+    @Body('email') email: string
+  ) {
+    const user = await this.userService.updateEmail(id, email);
+    if (!user) throw new NotFoundException('User not found');
+    return user;
+  }
 
   @Patch('me')
   async changeMyPassword(
@@ -118,4 +142,5 @@ export class UsersController {
 
     return { message: 'Password updated successfully' };
   }
+
 }

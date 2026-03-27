@@ -1,5 +1,4 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { RoleService } from '../../../contexts/identity-access/roles/application/role.service';
 import {
   BadRequestException,
   NotFoundException,
@@ -7,7 +6,9 @@ import {
 } from '@nestjs/common';
 import { UsersController } from './users.controller';
 import { UserService } from '../../../contexts/identity-access/users/application/user.service';
+import { RoleService } from '../../../contexts/identity-access/roles/application/role.service';
 import { User } from '../../../contexts/identity-access/users/domain/user.entity';
+import { Role } from '../../../contexts/identity-access/roles/domain/role.entity';
 
 describe('UsersController', () => {
   let controller: UsersController;
@@ -17,6 +18,12 @@ describe('UsersController', () => {
     create: jest.Mock;
     changePassword: jest.Mock;
   };
+  let roleService: {
+    findAll: jest.Mock;
+  };
+
+  const mockRole = new Role('role-1', 'Admin');
+
 
   const mockUser = new User(
     'user-1',
@@ -33,9 +40,8 @@ describe('UsersController', () => {
       create: jest.fn(),
       changePassword: jest.fn(),
     };
-
-    const roleService = {
-      findAll: jest.fn().mockResolvedValue([]),
+    roleService = {
+      findAll: jest.fn().mockResolvedValue([mockRole]),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -107,10 +113,7 @@ describe('UsersController', () => {
         id: 'user-1',
         username: 'admin',
         email: 'admin@academic.local',
-        role: {
-          id: 'role-1',
-          name: 'UNKNOWN',
-        },
+        role: { id: 'role-1', name: 'Admin' },
       },
     ]);
   });
@@ -124,10 +127,7 @@ describe('UsersController', () => {
       id: 'user-1',
       username: 'admin',
       email: 'admin@academic.local',
-      role: {
-        id: 'role-1',
-        name: 'UNKNOWN',
-      },
+      role: { id: 'role-1', name: 'Admin' },
     });
   });
 
@@ -137,5 +137,35 @@ describe('UsersController', () => {
     await expect(controller.findOne('missing')).rejects.toThrow(
       NotFoundException,
     );
+  });
+
+  it('debería devolver el usuario actual autenticado', async () => {
+    userService.findById.mockResolvedValue(mockUser);
+
+    const result = await controller.findCurrentUser({
+      user: { id: 'user-1' },
+    } as never);
+
+    expect(userService.findById).toHaveBeenCalledWith('user-1');
+    expect(result).toEqual({
+      id: 'user-1',
+      username: 'admin',
+      email: 'admin@academic.local',
+      role: { id: 'role-1', name: 'UNKNOWN' },
+    });
+  });
+
+  it('debería lanzar UnauthorizedException en /me si no hay usuario autenticado', async () => {
+    await expect(controller.findCurrentUser({} as never)).rejects.toThrow(
+      UnauthorizedException,
+    );
+  });
+
+  it('debería lanzar NotFoundException en /me si el usuario autenticado no existe', async () => {
+    userService.findById.mockResolvedValue(null);
+
+    await expect(
+      controller.findCurrentUser({ user: { id: 'missing' } } as never),
+    ).rejects.toThrow(NotFoundException);
   });
 });
