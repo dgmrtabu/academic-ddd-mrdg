@@ -26,7 +26,7 @@ export class AuthController {
     res.cookie(JWT_COOKIE_NAME, result.access_token, {
       httpOnly: true,
       secure: isProd,
-      sameSite: isProd ? 'lax' : 'none',
+      sameSite: isProd ? 'none' : 'lax', // Fix SameSite configuration
       domain: COOKIE_DOMAIN,
       path: '/',
       maxAge: 2 * 60 * 60 * 1000, // 2h (match with JWT signOptions)

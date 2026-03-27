@@ -79,9 +79,9 @@ type SidebarProps = {
 function SidebarNavContent({ onNavigate }: { onNavigate?: () => void }) {
   const user = useAuthStore((s) => s.user);
   const clearAuth = useAuthStore((s) => s.clearAuth);
-  const items = user ? MENU_BY_ROLE[user.role.name as Role] : [];
+  const items = user ? MENU_BY_ROLE[user.role?.name as Role] : [];
 
-  if (items.length === 0) return null;
+  if (!items || items.length === 0) return null;
 
   const handleLogout = () => {
     clearAuth();
@@ -114,9 +114,9 @@ function SidebarNavContent({ onNavigate }: { onNavigate?: () => void }) {
 
 export function Sidebar({ open = false, onClose }: SidebarProps) {
   const user = useAuthStore((s) => s.user);
-  const items = user ? MENU_BY_ROLE[user.role.name as Role] : [];
+  const items = user ? MENU_BY_ROLE[user.role?.name as Role] : [];
 
-  if (items.length === 0) return null;
+  if (!items || items.length === 0) return null;
 
   return (
     <>

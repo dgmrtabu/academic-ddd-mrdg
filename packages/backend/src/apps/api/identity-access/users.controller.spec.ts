@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { RoleService } from '../../../contexts/identity-access/roles/application/role.service';
 import {
   BadRequestException,
   NotFoundException,
@@ -33,9 +34,16 @@ describe('UsersController', () => {
       changePassword: jest.fn(),
     };
 
+    const roleService = {
+      findAll: jest.fn().mockResolvedValue([]),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UsersController],
-      providers: [{ provide: UserService, useValue: userService }],
+      providers: [
+        { provide: UserService, useValue: userService },
+        { provide: RoleService, useValue: roleService },
+      ],
     }).compile();
 
     controller = module.get<UsersController>(UsersController);
@@ -99,7 +107,10 @@ describe('UsersController', () => {
         id: 'user-1',
         username: 'admin',
         email: 'admin@academic.local',
-        roleId: 'role-1',
+        role: {
+          id: 'role-1',
+          name: 'UNKNOWN',
+        },
       },
     ]);
   });
@@ -113,7 +124,10 @@ describe('UsersController', () => {
       id: 'user-1',
       username: 'admin',
       email: 'admin@academic.local',
-      roleId: 'role-1',
+      role: {
+        id: 'role-1',
+        name: 'UNKNOWN',
+      },
     });
   });
 
