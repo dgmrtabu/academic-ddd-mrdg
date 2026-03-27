@@ -87,7 +87,7 @@ function SidebarNavContent({ onNavigate }: { onNavigate?: () => void }) {
         : undefined;
   const items = role ? MENU_BY_ROLE[role] ?? [] : [];
 
-  if (items.length === 0) return null;
+  if (!items || items.length === 0) return null;
 
   const handleLogout = () => {
     clearAuth();
@@ -128,7 +128,7 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
         : undefined;
   const items = role ? MENU_BY_ROLE[role] ?? [] : [];
 
-  if (items.length === 0) return null;
+  if (!items || items.length === 0) return null;
 
   return (
     <>
