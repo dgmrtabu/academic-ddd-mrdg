@@ -7,6 +7,7 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
+    "start:prod": "node dist/main.js",
     "test": "jest",
     "test:cov": "jest --coverage --watchman=false",
     "typeorm": "typeorm-ts-node-commonjs -d ./src/contexts/shared/infrastructure/persistence/typeorm/data-source.ts",
