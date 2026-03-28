@@ -5,8 +5,9 @@ import { Public } from '../../../contexts/identity-access/auth/infrastructure/pu
 
 const JWT_COOKIE_NAME = process.env.JWT_COOKIE_NAME ?? 'access_token';
 const COOKIE_DOMAIN = process.env.COOKIE_DOMAIN ?? undefined;
-const COOKIE_SAMESITE = process.env.COOKIE_SAMESITE ?? 'lax';
+const COOKIE_SAMESITE = process.env.COOKIE_SAMESITE?.trim().toLowerCase();
 const COOKIE_SECURE_ENV = process.env.COOKIE_SECURE ?? undefined;
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
 @Controller('auth')
 export class AuthController {
@@ -25,10 +26,17 @@ export class AuthController {
       body.password ?? '',
     );
 
-    const cookieSameSite =
+    const configuredSameSite =
       COOKIE_SAMESITE === 'strict' || COOKIE_SAMESITE === 'lax' || COOKIE_SAMESITE === 'none'
         ? COOKIE_SAMESITE
-        : 'lax';
+        : undefined;
+
+    const forwardedProto = req.get('x-forwarded-proto')?.split(',')[0]?.trim().toLowerCase();
+    const isHttpsRequest = req.secure || forwardedProto === 'https';
+
+    // En despliegues tipo Render el frontend suele consumir la API desde otro origen.
+    // Si no hubo configuración explícita y estamos en producción con HTTPS, usamos None.
+    const cookieSameSite = configuredSameSite ?? (IS_PRODUCTION && isHttpsRequest ? 'none' : 'lax');
 
     const cookieSecureByEnv =
       COOKIE_SECURE_ENV === 'true' ? true : COOKIE_SECURE_ENV === 'false' ? false : undefined;
@@ -38,7 +46,7 @@ export class AuthController {
     // - Si no SameSite=None => usa req.secure (real detrás de proxy) o lo que indique COOKIE_SECURE.
     const cookieSecure =
       cookieSecureByEnv ??
-      (cookieSameSite === 'none' ? true : req.secure);
+      (cookieSameSite === 'none' ? true : isHttpsRequest);
 
     const cookieOptions: CookieOptions = {
       httpOnly: true,
