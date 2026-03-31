@@ -4,7 +4,8 @@ import { MainLayout } from '../../templates/MainLayout';
 import { Button } from '../../atoms/Button';
 import { Input } from '../../atoms/Input';
 import { getSchedule, updateSchedule } from '../../../services/scheduleService';
-import { getCourses, type Course } from '../../../services/courseService';
+import { getCourses } from '../../../services/courseService';
+import type { Course } from '../../../entities';
 import {
   getClassrooms,
   type Classroom,

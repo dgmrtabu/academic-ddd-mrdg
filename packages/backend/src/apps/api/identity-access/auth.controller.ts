@@ -14,7 +14,6 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Public()
-  // throttle más agresivo configurado desde ThrottlerModule con key 'auth'
   @Post('login')
   async login(
     @Body() body: { username: string; password: string },

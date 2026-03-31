@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createSchedule } from '../../../services/scheduleService';
-import { getCourses, type Course } from '../../../services/courseService';
+import { getCourses } from '../../../services/courseService';
+import type { Course } from '../../../entities';
 import {
   getClassrooms,
   type Classroom,
